@@ -6,11 +6,15 @@ import { Repository } from 'typeorm';
 import { RegsiterAuthDto } from './dto/register-auth.dto';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { compare } from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 
 @Injectable()
 export class AuthService {
-    constructor(@InjectRepository(User) private userRespository: Repository<User>) {
+    constructor(
+        @InjectRepository(User) private userRespository: Repository<User>,
+        private jwtService: JwtService
+    ) {
 
     }
 
@@ -31,8 +35,21 @@ export class AuthService {
 
 
         const newUser = this.userRespository.create(user);
-        return this.userRespository.save(newUser);
+        const userSaved = await this.userRespository.save(newUser);
 
+        const payload = {
+            id: userSaved.id,
+            name: userSaved.name,
+        };
+
+        const token = this.jwtService.sign(payload);
+        const data = {
+            user: userSaved,
+            token: 'Bearer ' + token
+        }
+
+        delete data.user.password
+        return data;
     }
 
     async login(loginData: LoginAuthDto) {
@@ -50,7 +67,19 @@ export class AuthService {
             return new HttpException("Senha incorreta", HttpStatus.FORBIDDEN)
         }
 
-        return userFound;
+        const payload = {
+            id: userFound.id,
+            name: userFound.name,
+        };
+
+        const token = this.jwtService.sign(payload);
+        const data = {
+            user: userFound,
+            token: 'Bearer ' + token
+        }
+
+        delete data.user.password
+        return data;
     }
 
 }
