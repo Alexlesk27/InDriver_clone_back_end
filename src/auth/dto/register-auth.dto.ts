@@ -23,5 +23,8 @@ export class RegsiterAuthDto{
     @IsString()
     @MinLength(6, {message: "Sua senha deve conter 6 ou mais  caracteres"})
     password: String;
+
+    
+    rolesIds: String[];
     
 }
