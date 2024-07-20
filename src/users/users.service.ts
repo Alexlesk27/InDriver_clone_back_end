@@ -29,7 +29,7 @@ export class UsersService {
     const userFound = await this.userRepostory.findOneBy({ id: id })
 
     if (!userFound) {
-      return new HttpException('Usuário não existe', HttpStatus.NOT_FOUND)
+      throw new HttpException('Usuário não existe', HttpStatus.NOT_FOUND)
     }
 
     const updatedUser = Object.assign(userFound, user)
@@ -42,7 +42,7 @@ export class UsersService {
     console.log('Url' + url)
 
     if(url === undefined && url === null){
-      return new HttpException('Não foi possivel salvar a imagem', HttpStatus.INTERNAL_SERVER_ERROR)
+      throw new HttpException('Não foi possivel salvar a imagem', HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 

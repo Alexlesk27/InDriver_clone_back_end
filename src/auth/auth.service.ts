@@ -28,7 +28,7 @@ export class AuthService {
         const phoneExist = await this.userRespository.findOneBy({ phone });
 
         const newUser = this.userRespository.create(user);
-        const rolesIds = user.rolesIds
+        let rolesIds = [];
         if (emailExist) {
             throw new HttpException("Email já existe", HttpStatus.CONFLICT);
         }
@@ -40,16 +40,23 @@ export class AuthService {
         const roles = await this.rolesRepository.findBy({id: In(rolesIds)})
 
         newUser.roles = roles;
-        // Adicione logs para depurar os valores
-        console.log('user:', user);
-        console.log('rolesIds:', rolesIds);
 
+        if(user.rolesIds !== undefined && user.rolesIds !== null){
+          rolesIds = user.rolesIds;
+        }
+
+        else{
+            rolesIds.push('CLIENT')
+        }
        
         const userSaved = await this.userRespository.save(newUser);
+
+        const rolesString = userSaved.roles.map(rol => rol.id);
 
         const payload = {
             id: userSaved.id,
             name: userSaved.name,
+            roles: rolesString
         };
 
         const token = this.jwtService.sign(payload);
@@ -73,18 +80,21 @@ export class AuthService {
     )
 
         if (!userFound) {
-            return new HttpException("Email não cadastrado", HttpStatus.NOT_FOUND)
+            throw new HttpException("Email não cadastrado", HttpStatus.NOT_FOUND)
         }
 
         const isPasswordValid = await compare(password, userFound.password)
 
         if (!isPasswordValid) {
-            return new HttpException("Senha incorreta", HttpStatus.FORBIDDEN)
+            throw new HttpException("Senha incorreta", HttpStatus.FORBIDDEN)
         }
+
+        const rolesIds = userFound.roles.map(rol => rol.id);
 
         const payload = {
             id: userFound.id,
             name: userFound.name,
+            roles: rolesIds
         };
 
         const token = this.jwtService.sign(payload);

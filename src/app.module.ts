@@ -6,7 +6,7 @@ import { UsersModule } from './users/users.module';
 import { User } from './users/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
-import { jwtConstants } from './jwt.constants.env';
+import { jwtConstants } from './auth/jwt/jwt.constants.env';
 import { RolesModule } from './roles/roles.module';
 
 
